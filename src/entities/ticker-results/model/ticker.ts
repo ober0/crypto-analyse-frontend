@@ -1,3 +1,11 @@
+export interface TickerUsage {
+    id: number
+    model: TickerModels
+    response: number
+    prompt: number
+    createdAt: string
+}
+
 export interface Ticker {
     id: number
     name: string
@@ -27,6 +35,8 @@ export interface ResultTicker {
     createdAt: string
     ticker: Omit<Ticker, 'processCount'>
     model: TickerModels
+    usageId: number | null
+    usage: TickerUsage | null
 }
 
 export enum TickerDirection {

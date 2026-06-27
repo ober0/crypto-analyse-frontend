@@ -1,15 +1,10 @@
 import apiClient from '@/shared/api'
-import { ApiQueryKeys, GLOBAL_DICTIONARY } from '@/shared/config'
+import { ApiQueryKeys } from '@/shared/config'
 import { useMutation } from '@tanstack/react-query'
 import { AxiosPromise } from 'axios'
-import Cookies from 'js-cookie'
 
-interface RefreshResponse {
-    accessToken: string
-}
-
-export const refreshTokens = async (): AxiosPromise<RefreshResponse> => {
-    const res = await apiClient.post('/auth/refresh', {}, { withCredentials: true })
+export const refreshTokens = async (): AxiosPromise<void> => {
+    const res = await apiClient.post('/auth/refresh')
 
     return res
 }
@@ -17,9 +12,6 @@ export const refreshTokens = async (): AxiosPromise<RefreshResponse> => {
 export const useRefresh = () => {
     return useMutation({
         mutationKey: [ApiQueryKeys.REFRESH],
-        mutationFn: refreshTokens,
-        onSuccess: (response) => {
-            Cookies.set(GLOBAL_DICTIONARY.ACCESS_TOKEN, response.data.accessToken)
-        }
+        mutationFn: refreshTokens
     })
 }

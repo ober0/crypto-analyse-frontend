@@ -10,14 +10,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResultsTickers } from '@/entities/ticker-results/api/use-get-processed-tickers'
 import { useAvailableTickers } from '@/entities/ticker-results/api/use-get-tickers'
-import { TickerDirection, TickerModels, TickerTimeFrame } from '@/entities/ticker-results/model/ticker'
+import { TickerModels } from '@/entities/ticker-results/model/ticker'
 import { PLACEHOLDER_QUERY, SortOptions } from '@/shared/types'
 import { cn } from '@/shared/utils'
 import { Check, ChevronDownIcon, ChevronsUpDown, SortAsc, SortDesc, Trash } from 'lucide-react'
 import { useState } from 'react'
 import dayjs from 'dayjs'
-import { DATE_TIME_DEFAULT_FORMAT } from '@/shared/config'
 import { Pagination } from '@/components/pagination'
+import { ResultTickerRow } from './ui/result-ticker-row'
 
 export const ResultsTickersList = () => {
     const [page, setPage] = useState(1)
@@ -77,33 +77,6 @@ export const ResultsTickersList = () => {
     const { data: tickers } = useAvailableTickers()
 
     if (isLoading) return <Loader />
-
-    const getDirectionIcon = (direction: TickerDirection) => {
-        switch (direction) {
-            case TickerDirection.LONG:
-                return '↗'
-            case TickerDirection.SHORT:
-                return '↘'
-            default:
-                return '→'
-        }
-    }
-
-    const formatPrice = (price: number | null) => {
-        if (!price) return '-'
-        return `$${price.toFixed(2)}`
-    }
-
-    const getTimeframeLabel = (timeframe: TickerTimeFrame) => {
-        switch (timeframe) {
-            case TickerTimeFrame.OneDay:
-                return '1D'
-            case TickerTimeFrame.OneWeek:
-                return '1W'
-            default:
-                return timeframe
-        }
-    }
 
     return (
         <div className="flex flex-col gap-1">
@@ -431,187 +404,34 @@ export const ResultsTickersList = () => {
                 <table className="w-full min-w-full divide-y divide-gray-800/50">
                     <thead className="bg-gray-900/50">
                         <tr>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
+                            <th className="sticky top-0 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-400">
                                 Тикер
                             </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Направление
+                            <th className="sticky top-0 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                                Цены
                             </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Цена открытия
+                            <th className="sticky top-0 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                                Δ
                             </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Прогноз
+                            <th className="sticky top-0 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                                PNL
                             </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Цена закрытия
-                            </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Разница (нереализованная)
-                            </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                PNL (unrealizedPnl)
-                            </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                SL/TP/Плечо
-                            </th>
-                            <th className="sticky top-0 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                                Статус
+                            <th className="sticky top-0 px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                                SL / TP
                             </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800/30 bg-transparent">
                         {resultsTicker?.data.count === 0 && (
                             <tr>
-                                <td colSpan={10} className="px-6 py-8 text-center text-gray-400">
+                                <td colSpan={5} className="px-3 py-8 text-center text-gray-400">
                                     Ничего не найдено
                                 </td>
                             </tr>
                         )}
-                        {resultsTicker?.data.data.map((el) => {
-                            return (
-                                <tr
-                                    key={el.id}
-                                    className={cn(
-                                        'bg-linear-to-r cursor-target group from-transparent via-gray-800/5 to-transparent transition-all duration-300 hover:from-gray-800/10 hover:via-gray-800/20 hover:to-gray-800/10',
-                                        el.difference && el.difference > 0
-                                            ? 'from-green-500/5 via-green-500/10 to-green-500/5 hover:from-green-500/10 hover:via-green-500/20 hover:to-green-500/10'
-                                            : 'from-red-500/5 via-red-500/10 to-red-500/5 hover:from-red-500/10 hover:via-red-500/20 hover:to-red-500/10'
-                                    )}
-                                >
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground text-sm">{el.model}</span>
-                                        </div>
-                                        <div className="flex flex-row items-center gap-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-bold text-white">{el.ticker.name}</span>
-                                                <span
-                                                    className={cn(
-                                                        'rounded-full border px-2 py-1 text-xs font-medium',
-                                                        el.direction === TickerDirection.LONG
-                                                            ? 'border-green-400/30 bg-green-400/10 text-green-400'
-                                                            : el.direction === TickerDirection.SHORT
-                                                              ? 'border-red-400/30 bg-red-400/10 text-red-400'
-                                                              : 'border-gray-400/30 bg-gray-400/10 text-gray-400'
-                                                    )}
-                                                >
-                                                    {getTimeframeLabel(el.timeframe)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground text-sm">
-                                                {dayjs(el.createdAt).format(DATE_TIME_DEFAULT_FORMAT)}
-                                            </span>
-                                        </div>
-                                        {!el.isPredictAchieved && (
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-muted-foreground text-sm">
-                                                    Цена не дошла то точки
-                                                </span>
-                                            </div>
-                                        )}
-                                    </td>
-
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className={cn(
-                                                    'text-lg font-bold',
-                                                    el.direction === TickerDirection.LONG
-                                                        ? 'text-green-400'
-                                                        : el.direction === TickerDirection.SHORT
-                                                          ? 'text-red-400'
-                                                          : 'text-gray-400'
-                                                )}
-                                            >
-                                                {getDirectionIcon(el.direction)}
-                                            </span>
-                                            <span className="text-sm text-gray-300">
-                                                {el.direction === TickerDirection.LONG
-                                                    ? 'LONG'
-                                                    : el.direction === TickerDirection.SHORT
-                                                      ? 'SHORT'
-                                                      : 'NEUTRAL'}
-                                            </span>
-                                        </div>
-                                    </td>
-
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-white">{formatPrice(el.currentPrice)}</p>
-                                        </div>
-                                    </td>
-
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-blue-300">
-                                                {formatPrice(el.predictedPrice)}
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p className="font-medium text-purple-300">{formatPrice(el.realPrice)}</p>
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p>{el.difference}$</p>
-                                            <p className="text-muted-foreground text-sm">{el.unrealizedDifference}$</p>
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p>{el.pnl}%</p>
-                                            <p className="text-muted-foreground text-sm">{el.unrealizedPnl}%</p>
-                                        </div>
-                                    </td>
-
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="flex flex-col gap-1 text-xs">
-                                            {el.stopLoss && (
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="text-muted-foreground">SL:</span>
-                                                    <span className="font-medium text-red-400">
-                                                        {formatPrice(el.stopLoss)}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {el.takeProfit && (
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="text-muted-foreground">TP:</span>
-                                                    <span className="font-medium text-green-400">
-                                                        {formatPrice(el.takeProfit)}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {!el.stopLoss && !el.takeProfit && <span className="text-gray-500">-</span>}
-                                            <div className="flex flex-row items-center gap-1">
-                                                <p className="text-muted-foreground">Плечо:</p>
-                                                <p className="text-sm text-white">
-                                                    {el.leverage ? `${el.leverage}x` : '-'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="space-y-1">
-                                            <p
-                                                className={cn(
-                                                    'text-sm font-medium',
-                                                    el.isClosed ? 'text-yellow-400' : 'text-green-400'
-                                                )}
-                                            >
-                                                {el.isClosed ? 'Завершён' : 'Активен'}
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
-                        })}
+                        {resultsTicker?.data.data.map((el) => (
+                            <ResultTickerRow key={el.id} ticker={el} />
+                        ))}
                     </tbody>
                 </table>
             </div>

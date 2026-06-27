@@ -7,5 +7,7 @@ export const ApiQueryKeys = {
     TICKERS: 'tickers',
     RESULTS_TICKERS: 'results-tickers',
 
-    SUMMARY: 'summary'
+    SUMMARY: 'summary',
+
+    USAGE_TOTAL: 'usage-total'
 } as const
