@@ -1,5 +1,6 @@
 'use client'
 
+import { PageHeader } from '@/components/page-layout'
 import { UsageModule } from '@/features/usage'
 import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
 import { Loader } from '@/components/loader'
@@ -15,8 +16,8 @@ export default function UsagePage() {
     if (!isAuth) return push(ROUTES.AUTH_PAGE)
 
     return (
-        <div className="flex flex-col gap-4">
-            <h1 className="text-xl font-semibold">Траты на токены</h1>
+        <div className="flex flex-col gap-6">
+            <PageHeader title="Траты" description="Расход токенов по моделям AI" />
             <UsageModule />
         </div>
     )
