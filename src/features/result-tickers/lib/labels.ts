@@ -2,8 +2,8 @@ import { TickerDirection, TickerModels, TickerTimeFrame } from '@/entities/ticke
 
 export const MODEL_LABELS: Record<TickerModels, string> = {
     [TickerModels.GPT5]: 'GPT-5',
-    [TickerModels.DEEPSEEKR1T]: 'DeepSeek R1',
-    [TickerModels.QWEN3]: 'Llama 4'
+    [TickerModels.DEEPSEEK4FLASH]: 'DeepSeek v4 flash',
+    [TickerModels.LLAMA4]: 'Llama 4'
 }
 
 export const getDirectionIcon = (direction: TickerDirection) => {

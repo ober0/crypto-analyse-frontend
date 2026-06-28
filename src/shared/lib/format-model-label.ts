@@ -1,6 +1,5 @@
 const KNOWN_MODEL_LABELS: Record<string, string> = {
     Gpt5: 'GPT-5',
-    DeepseekR1T: 'DeepSeek R1',
     Deepseek4Flash: 'DeepSeek 4 Flash',
     Llama4: 'Llama 4'
 }

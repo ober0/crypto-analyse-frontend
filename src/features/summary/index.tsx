@@ -188,9 +188,9 @@ export const SummaryModule = () => {
                                     <SelectValue placeholder="Все модели" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value={TickerModels.DEEPSEEKR1T}>DeepSeek R1</SelectItem>
+                                    <SelectItem value={TickerModels.DEEPSEEK4FLASH}>DeepSeek v4 flash</SelectItem>
                                     <SelectItem value={TickerModels.GPT5}>GPT-5</SelectItem>
-                                    <SelectItem value={TickerModels.QWEN3}>Llama 4</SelectItem>
+                                    <SelectItem value={TickerModels.LLAMA4}>Llama 4</SelectItem>
                                 </SelectContent>
                             </Select>
                         </FilterField>
