@@ -9,11 +9,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
 import { useSelf } from '@/entities/user/api/use-self'
 import { cn } from '@/shared/utils'
+import { Bot, LineChart, Receipt, Wallet } from 'lucide-react'
 
 const NAV_ITEMS = [
-    { href: ROUTES.HOME_PAGE, label: 'Прогнозы' },
-    { href: ROUTES.USAGE_PAGE, label: 'Траты' },
-    { href: ROUTES.SUMMARY_PAGE, label: 'Отчеты' }
+    { href: ROUTES.HOME_PAGE, label: 'Прогнозы', icon: LineChart },
+    { href: ROUTES.BOTS_PAGE, label: 'Боты', icon: Bot },
+    { href: ROUTES.USAGE_PAGE, label: 'Траты', icon: Wallet },
+    { href: ROUTES.SUMMARY_PAGE, label: 'Отчеты', icon: Receipt }
 ] as const
 
 export const Header = () => {
@@ -27,8 +29,8 @@ export const Header = () => {
 
     return (
         <div className="border-primary/50 bg-background/50 flex w-full flex-col gap-3 rounded-2xl border p-3 backdrop-blur sm:rounded-full sm:p-4 lg:flex-row lg:items-center lg:justify-between">
-            <nav className="grid w-full grid-cols-3 gap-1 sm:flex sm:w-auto sm:gap-2">
-                {NAV_ITEMS.map(({ href, label }) => {
+            <nav className="grid w-full grid-cols-2 gap-1 sm:flex sm:w-auto sm:gap-2">
+                {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                     const isActive = pathname === href
 
                     return (
@@ -37,10 +39,11 @@ export const Header = () => {
                                 variant={isActive ? 'default' : 'ghost'}
                                 size="sm"
                                 className={cn(
-                                    'cursor-target w-full truncate px-2 sm:w-auto sm:px-3',
+                                    'cursor-target w-full gap-1.5 truncate px-2 sm:w-auto sm:px-3',
                                     !isActive && 'text-muted-foreground'
                                 )}
                             >
+                                <Icon className="size-3.5 shrink-0 sm:size-4" />
                                 {label}
                             </Button>
                         </Link>
