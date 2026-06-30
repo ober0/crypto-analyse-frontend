@@ -20,10 +20,10 @@ import { useAvailableTickers } from '@/entities/ticker-results/api/use-get-ticke
 import { TickerModels } from '@/entities/ticker-results/model/ticker'
 import { INTERVAL_LABELS } from '@/features/ai-bots/lib/labels'
 import { formatModelLabel } from '@/shared/lib/format-model-label'
+import { getAxiosErrorMessage } from '@/shared/lib/get-axios-error-message'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { AxiosError } from 'axios'
 
 export const CreateAiBotDialog = () => {
     const [open, setOpen] = useState(false)
@@ -73,8 +73,8 @@ export const CreateAiBotDialog = () => {
                     setOpen(false)
                     reset()
                 },
-                onError: (error: AxiosError<{ message?: string }>) => {
-                    toast.error(error.response?.data?.message || 'Не удалось создать бота')
+                onError: (error) => {
+                    toast.error(getAxiosErrorMessage(error, 'Не удалось создать бота'))
                 }
             }
         )

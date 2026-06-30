@@ -10,8 +10,8 @@ import {
 } from '@/entities/ai-processing/api/use-ai-bots'
 import { AiBotListItem } from '@/entities/ai-processing/model/ai-bot'
 import { DATE_TIME_DEFAULT_FORMAT } from '@/shared/config'
+import { getAxiosErrorMessage } from '@/shared/lib/get-axios-error-message'
 import { cn } from '@/shared/utils'
-import { AxiosError } from 'axios'
 import dayjs from 'dayjs'
 import { Eye, Pause, Play, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -41,8 +41,8 @@ export const AiBotCard = ({ bot }: AiBotCardProps) => {
             onSuccess: () => {
                 toast.success('Бот запущен')
             },
-            onError: (e: AxiosError<{ message?: string }>) => {
-                toast.error(e.response?.data?.message || 'Ошибка запуска')
+            onError: (error) => {
+                toast.error(getAxiosErrorMessage(error, 'Ошибка запуска'))
             }
         })
     }
@@ -52,8 +52,8 @@ export const AiBotCard = ({ bot }: AiBotCardProps) => {
             onSuccess: () => {
                 toast.success('Бот остановлен')
             },
-            onError: (e: AxiosError<{ message?: string }>) => {
-                toast.error(e.response?.data?.message || 'Ошибка остановки')
+            onError: (error) => {
+                toast.error(getAxiosErrorMessage(error, 'Ошибка остановки'))
             }
         })
     }
@@ -65,8 +65,8 @@ export const AiBotCard = ({ bot }: AiBotCardProps) => {
             onSuccess: () => {
                 toast.success('Бот удалён')
             },
-            onError: (e: AxiosError<{ message?: string }>) => {
-                toast.error(e.response?.data?.message || 'Ошибка удаления')
+            onError: (error) => {
+                toast.error(getAxiosErrorMessage(error, 'Ошибка удаления'))
             }
         })
     }

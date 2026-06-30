@@ -4,7 +4,7 @@ import { GlassPanel } from '@/components/page-layout'
 import { ModelUsageTotal } from '@/entities/ticker-results/model/usage'
 import { formatModelLabel } from '@/shared/lib/format-model-label'
 import { cn } from '@/shared/utils'
-import { Bot, Coins } from 'lucide-react'
+import { Coins } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 const MODEL_TONES = [
