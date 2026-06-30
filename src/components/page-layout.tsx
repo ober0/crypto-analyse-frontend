@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 export const PageHeader = ({ title, description }: { title: string; description?: string }) => (
     <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
         {description && <p className="text-muted-foreground text-sm">{description}</p>}
     </div>
 )
@@ -29,7 +29,7 @@ export const PageSection = ({
 )
 
 export const GlassPanel = ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={cn('border-primary/50 bg-background/50 rounded-xl border backdrop-blur', className)}>
+    <div className={cn('border-primary/50 bg-background/50 rounded-xl border p-3 backdrop-blur sm:p-4', className)}>
         {children}
     </div>
 )

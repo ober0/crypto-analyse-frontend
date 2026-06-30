@@ -26,28 +26,36 @@ export const Header = () => {
     const { mutate: logout, isPending: isLoadingLogout } = useLogout()
 
     return (
-        <div className="border-primary/50 bg-background/50 flex w-full flex-col items-center justify-between gap-1 rounded-full border p-4 backdrop-blur lg:flex-row">
-            <div className="flex flex-row flex-wrap items-center gap-2">
+        <div className="border-primary/50 bg-background/50 flex w-full flex-col gap-3 rounded-2xl border p-3 backdrop-blur sm:rounded-full sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+            <nav className="grid w-full grid-cols-3 gap-1 sm:flex sm:w-auto sm:gap-2">
                 {NAV_ITEMS.map(({ href, label }) => {
                     const isActive = pathname === href
 
                     return (
-                        <Link key={href} href={href}>
+                        <Link key={href} href={href} className="min-w-0">
                             <Button
-                                variant={isActive ? 'default' : 'link'}
-                                className={cn('cursor-target', !isActive && 'text-muted-foreground')}
+                                variant={isActive ? 'default' : 'ghost'}
+                                size="sm"
+                                className={cn(
+                                    'cursor-target w-full truncate px-2 sm:w-auto sm:px-3',
+                                    !isActive && 'text-muted-foreground'
+                                )}
                             >
                                 {label}
                             </Button>
                         </Link>
                     )
                 })}
-            </div>
-            <div className="flex flex-row items-center gap-3">
-                {isAuth && user?.data.username}
+            </nav>
+
+            <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
+                {isAuth && (
+                    <span className="text-muted-foreground truncate text-sm">{user?.data.username}</span>
+                )}
                 <Button
                     variant={isAuth ? 'destructive' : 'ghost'}
-                    className="cursor-target"
+                    size="sm"
+                    className="cursor-target shrink-0"
                     onClick={() => {
                         if (isAuth) {
                             logout()

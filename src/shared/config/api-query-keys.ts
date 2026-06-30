@@ -9,5 +9,6 @@ export const ApiQueryKeys = {
 
     SUMMARY: 'summary',
 
-    USAGE_TOTAL: 'usage-total'
+    USAGE_TOTAL: 'usage-total',
+    AI_USAGE_TOTAL: 'ai-usage-total'
 } as const

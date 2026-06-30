@@ -107,13 +107,13 @@ export const Pagination: FC<PaginationProps> = ({
     }
 
     return (
-        <div className="flex flex-col items-center justify-between gap-1 px-2 py-4 lg:flex-row">
-            <div className="text-muted-foreground flex-1 text-sm">
-                Показано {(page - 1) * count + 1}-{Math.min(page * count, totalItems)} из {totalItems} элементов
+        <div className="flex flex-col items-center justify-between gap-4 px-1 py-3 sm:flex-row sm:gap-3 sm:px-2 sm:py-4">
+            <div className="text-muted-foreground w-full text-center text-xs sm:flex-1 sm:text-left sm:text-sm">
+                Показано {(page - 1) * count + 1}-{Math.min(page * count, totalItems)} из {totalItems}
             </div>
-            <div className="flex flex-wrap items-center space-x-6 lg:space-x-8">
-                <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium">Элементов на странице</p>
+            <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+                <div className="flex w-full items-center justify-center gap-2 sm:w-auto">
+                    <p className="text-muted-foreground text-xs sm:text-sm">На странице</p>
                     <Select value={count.toString()} onValueChange={handleItemsPerPageChange}>
                         <SelectTrigger className="h-8 w-max">
                             <SelectValue placeholder={count.toString()} />
@@ -128,7 +128,7 @@ export const Pagination: FC<PaginationProps> = ({
                     </Select>
                 </div>
                 {isLoading && <Loader />}
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
                     <Button
                         variant="outline"
                         size="sm"

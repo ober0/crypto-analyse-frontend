@@ -3,17 +3,12 @@
 import { PageHeader } from '@/components/page-layout'
 import { Loader } from '@/components/loader'
 import { SummaryModule } from '@/features/summary'
-import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
-import { ROUTES } from '@/shared/router'
-import { useRouter } from 'next/navigation'
+import { useRequireAuth } from '@/entities/auth/hooks/use-require-auth'
 
 export default function SummaryPage() {
-    const { push } = useRouter()
-    const { isAuth, isLoading } = useIsAuth()
+    const { canRender } = useRequireAuth()
 
-    if (isLoading) return <Loader />
-
-    if (!isAuth) return push(ROUTES.AUTH_PAGE)
+    if (!canRender) return <Loader />
 
     return (
         <div className="flex flex-col gap-6">

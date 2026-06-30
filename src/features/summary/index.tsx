@@ -111,7 +111,7 @@ export const SummaryModule = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            <GlassPanel className="flex flex-col gap-5 p-5">
+            <GlassPanel className="flex flex-col gap-4 p-3 sm:gap-5 sm:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-lg">
@@ -312,7 +312,7 @@ export const SummaryModule = () => {
             )}
 
             {groupedStats && groupedStats.length > 0 && (
-                <GlassPanel className="p-5">
+                <GlassPanel className="p-3 sm:p-5">
                     <h3 className="mb-4 text-base font-semibold">Детальная статистика по группам</h3>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                         {groupedStats.map((item, index) => (

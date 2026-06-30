@@ -2,22 +2,17 @@
 
 import { PageHeader } from '@/components/page-layout'
 import { UsageModule } from '@/features/usage'
-import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
+import { useRequireAuth } from '@/entities/auth/hooks/use-require-auth'
 import { Loader } from '@/components/loader'
-import { ROUTES } from '@/shared/router'
-import { useRouter } from 'next/navigation'
 
 export default function UsagePage() {
-    const { push } = useRouter()
-    const { isAuth, isLoading } = useIsAuth()
+    const { canRender } = useRequireAuth()
 
-    if (isLoading) return <Loader />
-
-    if (!isAuth) return push(ROUTES.AUTH_PAGE)
+    if (!canRender) return <Loader />
 
     return (
         <div className="flex flex-col gap-6">
-            <PageHeader title="Траты" description="Расход токенов по моделям AI" />
+            <PageHeader title="Траты" description="Расход токенов по прогнозам и AI ботам" />
             <UsageModule />
         </div>
     )

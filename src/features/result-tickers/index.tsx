@@ -11,6 +11,7 @@ import { PLACEHOLDER_QUERY, SortOptions } from '@/shared/types'
 import dayjs from 'dayjs'
 import { useCallback, useState } from 'react'
 import { ResultTickerRow } from './ui/result-ticker-row'
+import { ResultTickerCard } from './ui/result-ticker-card'
 import { ResultsFilters } from './ui/results-filters'
 
 export const ResultsTickersList = () => {
@@ -129,7 +130,16 @@ export const ResultsTickersList = () => {
                 onReset={handleReset}
             />
 
-            <GlassPanel className="overflow-hidden">
+            <div className="flex flex-col gap-2 md:hidden">
+                {resultsTicker?.data.count === 0 && (
+                    <GlassPanel className="p-8 text-center text-gray-400">Ничего не найдено</GlassPanel>
+                )}
+                {resultsTicker?.data.data.map((el) => (
+                    <ResultTickerCard key={el.id} ticker={el} />
+                ))}
+            </div>
+
+            <GlassPanel className="hidden overflow-hidden p-0 md:block">
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-full divide-y divide-gray-800/50">
                         <thead className="bg-gray-900/50">

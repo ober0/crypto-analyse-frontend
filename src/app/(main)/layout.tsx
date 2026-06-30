@@ -5,12 +5,12 @@ import { ReactNode } from 'react'
 export default function MainLayout({ children }: { children: ReactNode }) {
     return (
         <>
-            <div className="-z-100 absolute left-0 top-0 h-[300px] w-full overflow-hidden">
+            <div className="-z-100 absolute left-0 top-0 h-[200px] w-full overflow-hidden sm:h-[300px]">
                 <Aurora colorStops={['#668cff', '#b19eef', '#6755af']} blend={0.5} amplitude={1.0} speed={0.5} />
             </div>
-            <div className="mx-auto w-3/4 py-4">
+            <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
                 <Header />
-                <main className="my-4 px-0 lg:px-4">{children}</main>
+                <main className="my-3 min-w-0 sm:my-4">{children}</main>
             </div>
         </>
     )

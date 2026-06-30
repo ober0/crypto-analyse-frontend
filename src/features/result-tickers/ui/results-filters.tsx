@@ -162,7 +162,7 @@ export const ResultsFilters = ({
         sortClosedAt
 
     return (
-        <GlassPanel className="flex flex-col gap-5 p-5">
+        <GlassPanel className="flex flex-col gap-4 p-3 sm:gap-5 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                     <div className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-lg">

@@ -3,22 +3,17 @@
 import { PageHeader, PageSection } from '@/components/page-layout'
 import SplitText from '@/components/SplitText'
 import { Loader } from '@/components/loader'
-import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
+import { useRequireAuth } from '@/entities/auth/hooks/use-require-auth'
 import { AvailableTickers } from '@/features/tickers'
 import { ResultsTickersList } from '@/features/result-tickers'
-import { ROUTES } from '@/shared/router'
-import { useRouter } from 'next/navigation'
 
 export default function Home() {
-    const { push } = useRouter()
-    const { isAuth, isLoading } = useIsAuth()
+    const { canRender } = useRequireAuth()
 
-    if (isLoading) return <Loader />
-
-    if (!isAuth) return push(ROUTES.AUTH_PAGE)
+    if (!canRender) return <Loader />
 
     return (
-        <div className="flex w-full flex-col gap-8">
+        <div className="flex w-full flex-col gap-6 sm:gap-8">
             <div className="flex flex-col gap-4">
                 <PageHeader
                     title="Прогнозы"
@@ -26,7 +21,7 @@ export default function Home() {
                 />
                 <SplitText
                     text="Стал ли ты сегодня миллионером или снова нет?"
-                    className="text-muted-foreground text-center text-lg font-medium italic"
+                    className="text-muted-foreground text-center text-base font-medium italic sm:text-lg"
                     delay={40}
                     duration={0.3}
                     ease="power3.out"

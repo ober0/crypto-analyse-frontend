@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '@/shared/styles/index.css'
 import { QueryProvider } from '@/shared/providers/query-client'
-import TargetCursor from '@/components/TargetCursor'
+import ResponsiveTargetCursor from '@/components/responsive-target-cursor'
 import { Toaster } from 'react-hot-toast'
 
 const font_flobal = Inter({
@@ -23,11 +23,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ru" className="dark">
-            <body className={`${font_flobal.variable} antialiased`}>
+            <body className={`${font_flobal.variable} min-w-0 antialiased`}>
                 <QueryProvider>{children}</QueryProvider>
-                <TargetCursor spinDuration={7} hideDefaultCursor={true} />
+                <ResponsiveTargetCursor />
                 <Toaster />
-                <p className="my-4 w-full text-center text-sm italic">
+                <p className="text-muted-foreground my-4 w-full px-4 text-center text-xs italic sm:text-sm">
                     created by{' '}
                     <a href="https://github.com/roso1nik" className="cursor-target underline">
                         @roso1nik
