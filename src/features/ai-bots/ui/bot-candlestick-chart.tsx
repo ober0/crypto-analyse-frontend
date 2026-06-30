@@ -42,6 +42,8 @@ export const BotCandlestickChart = ({
     const markersRef = useRef<ISeriesMarkersPluginApi<Time> | null>(null)
     const prevLengthRef = useRef(0)
     const loadingMoreRef = useRef(false)
+    const userInteractedRef = useRef(false)
+    const loadMoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         loadingMoreRef.current = Boolean(loadingMore)
@@ -97,19 +99,34 @@ export const BotCandlestickChart = ({
 
         resizeObserver.observe(containerRef.current)
 
+        const markUserInteraction = () => {
+            userInteractedRef.current = true
+        }
+
+        containerRef.current.addEventListener('wheel', markUserInteraction, { passive: true })
+        containerRef.current.addEventListener('pointerdown', markUserInteraction)
+
         const handleVisibleRangeChange = () => {
-            if (!onLoadMore || !hasMore || loadingMoreRef.current) return
+            if (!onLoadMore || !hasMore || loadingMoreRef.current || !userInteractedRef.current) return
 
             const logicalRange = chart.timeScale().getVisibleLogicalRange()
             if (!logicalRange || logicalRange.from > 8) return
 
-            loadingMoreRef.current = true
-            onLoadMore()
+            if (loadMoreTimerRef.current) clearTimeout(loadMoreTimerRef.current)
+
+            loadMoreTimerRef.current = setTimeout(() => {
+                if (!onLoadMore || !hasMore || loadingMoreRef.current) return
+                loadingMoreRef.current = true
+                onLoadMore()
+            }, 250)
         }
 
         chart.timeScale().subscribeVisibleLogicalRangeChange(handleVisibleRangeChange)
 
         return () => {
+            if (loadMoreTimerRef.current) clearTimeout(loadMoreTimerRef.current)
+            containerRef.current?.removeEventListener('wheel', markUserInteraction)
+            containerRef.current?.removeEventListener('pointerdown', markUserInteraction)
             resizeObserver.disconnect()
             chart.timeScale().unsubscribeVisibleLogicalRangeChange(handleVisibleRangeChange)
             markers.detach()
@@ -118,6 +135,7 @@ export const BotCandlestickChart = ({
             seriesRef.current = null
             markersRef.current = null
             prevLengthRef.current = 0
+            userInteractedRef.current = false
         }
     }, [hasMore, interval, onLoadMore])
 

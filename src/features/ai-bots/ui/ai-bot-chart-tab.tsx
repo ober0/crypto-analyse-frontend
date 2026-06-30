@@ -3,16 +3,19 @@
 import { Loader } from '@/components/loader'
 import { Button } from '@/components/ui/button'
 import { Trade } from '@/entities/ai-processing/model/ai-bot'
-import { useGetMarketData } from '@/entities/market-data/api/use-get-market-data'
+import { fetchMarketDataPages, getMarketData } from '@/entities/market-data/api/fetch-market-data'
 import {
+    API_MAX_CANDLES,
     MARKET_INTERVAL_LABELS,
     MARKET_INTERVALS,
+    MarketCandle,
     MarketInterval
 } from '@/entities/market-data/model/market-data'
+import { ApiQueryKeys } from '@/shared/config'
 import { cn } from '@/shared/utils'
-import { CandlestickData, Time } from 'lightweight-charts'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { getCandlesPerPage, mergeChartCandles, normalizeCandles } from '../lib/chart-utils'
+import { useQuery } from '@tanstack/react-query'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { getCandlesPerPage, getInitialPagesCount, normalizeCandles } from '../lib/chart-utils'
 import { BotCandlestickChart } from './bot-candlestick-chart'
 
 interface AiBotChartTabProps {
@@ -74,47 +77,89 @@ const ChartMarketSession = ({
     interval: MarketInterval
     trades: Trade[]
 }) => {
-    const [page, setPage] = useState(0)
-    const [candles, setCandles] = useState<CandlestickData<Time>[]>([])
-    const [hasMore, setHasMore] = useState(true)
-    const loadingMoreRef = useRef(false)
+    const initialPages = getInitialPagesCount()
+    const [olderCandles, setOlderCandles] = useState<MarketCandle[]>([])
+    const [nextHistoryPage, setNextHistoryPage] = useState(initialPages)
+    const [hasMoreHistory, setHasMoreHistory] = useState(true)
+    const [loadingHistory, setLoadingHistory] = useState(false)
+    const loadingHistoryRef = useRef(false)
 
-    const { data, isLoading, isFetching } = useGetMarketData(
-        symbolId > 0
-            ? {
-                  symbolId,
-                  interval,
-                  page,
-                  candles: getCandlesPerPage()
-              }
-            : null
+    const initial = useQuery({
+        queryKey: [ApiQueryKeys.MARKET_DATA, 'chart-initial', symbolId, interval, initialPages],
+        queryFn: () => fetchMarketDataPages(symbolId, interval, 0, initialPages),
+        enabled: symbolId > 0,
+        staleTime: 60_000
+    })
+
+    const candles = useMemo(
+        () => normalizeCandles([...olderCandles, ...(initial.data ?? [])], interval),
+        [initial.data, interval, olderCandles]
     )
 
-    /* eslint-disable react-hooks/set-state-in-effect -- синхронизация страниц API с локальным массивом свечей */
-    useEffect(() => {
-        if (!data) return
+    const loadMoreHistory = useCallback(async () => {
+        if (loadingHistoryRef.current || !hasMoreHistory || symbolId <= 0) return
 
-        const normalized = normalizeCandles(data, interval)
-        setHasMore(normalized.length >= getCandlesPerPage())
-        setCandles((prev) => (page === 0 ? normalized : mergeChartCandles(prev, normalized)))
-        loadingMoreRef.current = false
-    }, [data, interval, page])
-    /* eslint-enable react-hooks/set-state-in-effect */
+        loadingHistoryRef.current = true
+        setLoadingHistory(true)
 
-    const handleLoadMore = useCallback(() => {
-        if (!hasMore || isFetching || loadingMoreRef.current) return
+        try {
+            const page = await getMarketData({
+                symbolId,
+                interval,
+                page: nextHistoryPage,
+                candles: getCandlesPerPage()
+            })
 
-        loadingMoreRef.current = true
-        setPage((prev) => prev + 1)
-    }, [hasMore, isFetching])
+            if (page.length === 0) {
+                setHasMoreHistory(false)
+                return
+            }
 
-    const isInitialLoading = isLoading && page === 0 && candles.length === 0
+            setOlderCandles((prevOlder) => {
+                const beforeCount = normalizeCandles(
+                    [...prevOlder, ...(initial.data ?? [])],
+                    interval
+                ).length
 
-    if (isInitialLoading) {
+                const nextOlder = [...prevOlder, ...page]
+                const afterCount = normalizeCandles(
+                    [...nextOlder, ...(initial.data ?? [])],
+                    interval
+                ).length
+
+                if (afterCount === beforeCount) {
+                    setHasMoreHistory(false)
+                }
+
+                return nextOlder
+            })
+
+            setNextHistoryPage((prev) => prev + 1)
+
+            if (page.length < API_MAX_CANDLES) {
+                setHasMoreHistory(false)
+            }
+        } catch {
+            // повтор при следующем скролле
+        } finally {
+            loadingHistoryRef.current = false
+            setLoadingHistory(false)
+        }
+    }, [hasMoreHistory, initial.data, interval, nextHistoryPage, symbolId])
+
+    if (initial.isLoading) {
         return (
             <div className="flex items-center justify-center py-16">
                 <Loader />
             </div>
+        )
+    }
+
+    if (initial.isError) {
+        return (
+            <p className="text-muted-foreground py-8 text-center text-sm">
+                Не удалось загрузить график
+            </p>
         )
     }
 
@@ -124,10 +169,9 @@ const ChartMarketSession = ({
                 candles={candles}
                 trades={trades}
                 interval={interval}
-                loading={isInitialLoading}
-                loadingMore={isFetching && page > 0}
-                onLoadMore={handleLoadMore}
-                hasMore={hasMore}
+                loadingMore={loadingHistory}
+                onLoadMore={hasMoreHistory ? loadMoreHistory : undefined}
+                hasMore={hasMoreHistory}
             />
 
             <div className="flex flex-wrap gap-3 text-[11px]">
@@ -138,7 +182,7 @@ const ChartMarketSession = ({
                     </span>
                 ))}
                 <span className="text-muted-foreground">
-                    {candles.length} свечей · прокрутите влево для загрузки истории
+                    {candles.length} свечей · старт {initialPages * API_MAX_CANDLES} · прокрутите влево для истории
                 </span>
             </div>
         </>

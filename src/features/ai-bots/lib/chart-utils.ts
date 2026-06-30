@@ -7,7 +7,11 @@ dayjs.extend(utc)
 
 const CANDLES_PER_PAGE = 100
 
+export const CHART_INITIAL_CANDLES = 200
+export const CHART_INITIAL_PAGES = CHART_INITIAL_CANDLES / CANDLES_PER_PAGE
+
 export const getCandlesPerPage = () => CANDLES_PER_PAGE
+export const getInitialPagesCount = () => CHART_INITIAL_PAGES
 
 export const toChartTime = (isoTime: string, interval: MarketInterval): Time => {
     const date = dayjs(isoTime).utc()
