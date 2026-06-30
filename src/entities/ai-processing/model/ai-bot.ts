@@ -132,6 +132,12 @@ export interface CreateAiBotRequest {
     withWebSearch?: boolean
 }
 
+export interface UpdateAiBotRequest {
+    checkIntervalMins?: number
+    customPrompt?: string
+    withWebSearch?: boolean
+}
+
 export interface AiBotsFilters {
     tickersIds?: number[]
     tickersId?: number

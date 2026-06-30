@@ -15,6 +15,7 @@ import { getAxiosErrorMessage } from '@/shared/lib/get-axios-error-message'
 import { cn } from '@/shared/utils'
 import dayjs from 'dayjs'
 import { Eye, Pause, Play, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import {
     canDelete,
@@ -27,6 +28,10 @@ import {
 } from '../lib/labels'
 import { formatPnl, isPositive } from '../lib/format'
 import { AiBotDetailDialog } from './ai-bot-detail-dialog'
+import { ConfirmActionDialog } from './confirm-action-dialog'
+import { EditAiBotDialog } from './edit-ai-bot-dialog'
+
+type PendingAction = 'stop' | 'delete' | null
 
 interface AiBotCardProps {
     bot: AiBotListItem
@@ -34,6 +39,8 @@ interface AiBotCardProps {
 
 export const AiBotCard = ({ bot }: AiBotCardProps) => {
     const { isAuth } = useIsAuth()
+    const [pendingAction, setPendingAction] = useState<PendingAction>(null)
+
     const { mutate: enable, isPending: enabling } = useEnableAiBot()
     const { mutate: disable, isPending: disabling } = useDisableAiBot()
     const { mutate: remove, isPending: deleting } = useDeleteAiBot()
@@ -49,123 +56,166 @@ export const AiBotCard = ({ bot }: AiBotCardProps) => {
         })
     }
 
-    const handleDisable = () => {
-        disable(bot.id, {
-            onSuccess: () => {
-                toast.success('Бот остановлен')
-            },
-            onError: (error) => {
-                toast.error(getAxiosErrorMessage(error, 'Ошибка остановки'))
-            }
-        })
-    }
+    const handleConfirmAction = () => {
+        if (pendingAction === 'stop') {
+            disable(bot.id, {
+                onSuccess: () => {
+                    toast.success('Бот остановлен')
+                    setPendingAction(null)
+                },
+                onError: (error) => {
+                    toast.error(getAxiosErrorMessage(error, 'Ошибка остановки'))
+                }
+            })
+            return
+        }
 
-    const handleDelete = () => {
-        if (!confirm('Удалить торгового бота?')) return
-
-        remove(bot.id, {
-            onSuccess: () => {
-                toast.success('Бот удалён')
-            },
-            onError: (error) => {
-                toast.error(getAxiosErrorMessage(error, 'Ошибка удаления'))
-            }
-        })
+        if (pendingAction === 'delete') {
+            remove(bot.id, {
+                onSuccess: () => {
+                    toast.success('Бот удалён')
+                    setPendingAction(null)
+                },
+                onError: (error) => {
+                    toast.error(getAxiosErrorMessage(error, 'Ошибка удаления'))
+                }
+            })
+        }
     }
 
     const totalPnl = formatPnl(bot.totalPnl)
     const avgPnl = formatPnl(bot.averagePnl)
 
+    const confirmConfig =
+        pendingAction === 'stop'
+            ? {
+                  title: 'Остановить бота?',
+                  description:
+                      'После остановки запустить его заново будет нельзя. Текущие сделки будут завершены по правилам бота.',
+                  confirmLabel: 'Остановить',
+                  destructive: false,
+                  loading: disabling
+              }
+            : pendingAction === 'delete'
+              ? {
+                    title: 'Удалить бота?',
+                    description: 'Бот и его настройки будут удалены без возможности восстановления.',
+                    confirmLabel: 'Удалить',
+                    destructive: true,
+                    loading: deleting
+                }
+              : null
+
     return (
-        <GlassPanel className="flex flex-col gap-3 p-3 sm:p-4">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex min-w-0 flex-col gap-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-base font-semibold">{bot.ticker.name}</span>
-                        <span className="text-muted-foreground text-xs">{formatBotModel(bot.model)}</span>
+        <>
+            <GlassPanel className="flex flex-col gap-3 p-3 sm:p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-base font-semibold">{bot.ticker.name}</span>
+                            <span className="text-muted-foreground text-xs">{formatBotModel(bot.model)}</span>
+                        </div>
+                        <span
+                            className={cn(
+                                'w-fit rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase',
+                                STATUS_TONES[bot.status]
+                            )}
+                        >
+                            {STATUS_LABELS[bot.status]}
+                        </span>
                     </div>
-                    <span
-                        className={cn(
-                            'w-fit rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase',
-                            STATUS_TONES[bot.status]
+                    <AiBotDetailDialog
+                        botId={bot.id}
+                        trigger={
+                            <Button variant="outline" size="sm" className="gap-1.5">
+                                <Eye className="size-3.5" />
+                                Детали
+                            </Button>
+                        }
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+                    <Metric label="Интервал" value={INTERVAL_LABELS[bot.interval]} />
+                    <Metric label="Проверка" value={`${bot.checkIntervalMins} мин`} />
+                    <Metric label="Сделок" value={String(bot.tradesCount)} />
+                    {totalPnl && (
+                        <Metric
+                            label="Общий PNL"
+                            value={totalPnl}
+                            className={bot.totalPnl != null && isPositive(bot.totalPnl) ? 'text-green-400' : 'text-red-400'}
+                        />
+                    )}
+                    {avgPnl && (
+                        <Metric
+                            label="Ср. PNL"
+                            value={avgPnl}
+                            className={bot.averagePnl != null && isPositive(bot.averagePnl) ? 'text-green-400' : 'text-red-400'}
+                        />
+                    )}
+                    <Metric label="Веб-поиск" value={bot.withWebSearch ? 'Да' : 'Нет'} />
+                </div>
+
+                <div className="text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                    {bot.startAt && <span>Старт: {dayjs(bot.startAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
+                    {bot.endAt && <span>Конец: {dayjs(bot.endAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
+                    {bot.nextCheckAt && (
+                        <span>След. проверка: {dayjs(bot.nextCheckAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>
+                    )}
+                </div>
+
+                {isAuth && (
+                    <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
+                        <EditAiBotDialog bot={bot} />
+                        {canEnable(bot.status) && (
+                            <Button size="sm" className="gap-1.5" onClick={handleEnable} loading={enabling}>
+                                <Play className="size-3.5" />
+                                Запустить
+                            </Button>
                         )}
-                    >
-                        {STATUS_LABELS[bot.status]}
-                    </span>
-                </div>
-                <AiBotDetailDialog
-                    botId={bot.id}
-                    trigger={
-                        <Button variant="outline" size="sm" className="gap-1.5">
-                            <Eye className="size-3.5" />
-                            Детали
-                        </Button>
-                    }
+                        {canDisable(bot.status) && (
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                className="gap-1.5"
+                                onClick={() => setPendingAction('stop')}
+                            >
+                                <Pause className="size-3.5" />
+                                Остановить
+                            </Button>
+                        )}
+                        {canDelete(bot.status) && (
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                className="gap-1.5"
+                                onClick={() => setPendingAction('delete')}
+                            >
+                                <Trash2 className="size-3.5" />
+                                Удалить
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </GlassPanel>
+
+            {confirmConfig && (
+                <ConfirmActionDialog
+                    open={pendingAction != null}
+                    onOpenChange={(open) => {
+                        if (!open && !confirmConfig.loading) {
+                            setPendingAction(null)
+                        }
+                    }}
+                    title={confirmConfig.title}
+                    description={confirmConfig.description}
+                    confirmLabel={confirmConfig.confirmLabel}
+                    destructive={confirmConfig.destructive}
+                    loading={confirmConfig.loading}
+                    onConfirm={handleConfirmAction}
                 />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-                <Metric label="Интервал" value={INTERVAL_LABELS[bot.interval]} />
-                <Metric label="Проверка" value={`${bot.checkIntervalMins} мин`} />
-                <Metric label="Сделок" value={String(bot.tradesCount)} />
-                {totalPnl && (
-                    <Metric
-                        label="Общий PNL"
-                        value={totalPnl}
-                        className={bot.totalPnl != null && isPositive(bot.totalPnl) ? 'text-green-400' : 'text-red-400'}
-                    />
-                )}
-                {avgPnl && (
-                    <Metric
-                        label="Ср. PNL"
-                        value={avgPnl}
-                        className={bot.averagePnl != null && isPositive(bot.averagePnl) ? 'text-green-400' : 'text-red-400'}
-                    />
-                )}
-                <Metric label="Веб-поиск" value={bot.withWebSearch ? 'Да' : 'Нет'} />
-            </div>
-
-            <div className="text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
-                {bot.startAt && <span>Старт: {dayjs(bot.startAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
-                {bot.endAt && <span>Конец: {dayjs(bot.endAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
-                {bot.nextCheckAt && <span>След. проверка: {dayjs(bot.nextCheckAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
-            </div>
-
-            {isAuth && (
-                <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
-                    {canEnable(bot.status) && (
-                        <Button size="sm" className="gap-1.5" onClick={handleEnable} loading={enabling}>
-                            <Play className="size-3.5" />
-                            Запустить
-                        </Button>
-                    )}
-                    {canDisable(bot.status) && (
-                        <Button
-                            size="sm"
-                            variant="secondary"
-                            className="gap-1.5"
-                            onClick={handleDisable}
-                            loading={disabling}
-                        >
-                            <Pause className="size-3.5" />
-                            Остановить
-                        </Button>
-                    )}
-                    {canDelete(bot.status) && (
-                        <Button
-                            size="sm"
-                            variant="destructive"
-                            className="gap-1.5"
-                            onClick={handleDelete}
-                            loading={deleting}
-                        >
-                            <Trash2 className="size-3.5" />
-                            Удалить
-                        </Button>
-                    )}
-                </div>
             )}
-        </GlassPanel>
+        </>
     )
 }
 

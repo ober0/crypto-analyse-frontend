@@ -9,7 +9,8 @@ import {
     AiBotListItem,
     AiBotsFilters,
     AiBotsSorts,
-    CreateAiBotRequest
+    CreateAiBotRequest,
+    UpdateAiBotRequest
 } from '../model/ai-bot'
 
 const searchAiBots = async (
@@ -46,6 +47,18 @@ const disableAiBot = async (id: number): AxiosPromise<AiBot> => {
 
 const deleteAiBot = async (id: number): AxiosPromise<AiBot> => {
     const res = await apiClient.delete(`/ai-processing/${id}`)
+
+    return res
+}
+
+const updateAiBot = async ({
+    id,
+    data
+}: {
+    id: number
+    data: UpdateAiBotRequest
+}): AxiosPromise<AiBot> => {
+    const res = await apiClient.patch(`/ai-processing/${id}`, data)
 
     return res
 }
@@ -109,6 +122,19 @@ export const useDeleteAiBot = () => {
         mutationFn: deleteAiBot,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [ApiQueryKeys.AI_BOTS] })
+        }
+    })
+}
+
+export const useUpdateAiBot = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationKey: [ApiQueryKeys.AI_BOTS_UPDATE],
+        mutationFn: updateAiBot,
+        onSuccess: (_, { id }) => {
+            queryClient.invalidateQueries({ queryKey: [ApiQueryKeys.AI_BOTS] })
+            queryClient.invalidateQueries({ queryKey: [ApiQueryKeys.AI_BOT_DETAIL, id] })
         }
     })
 }

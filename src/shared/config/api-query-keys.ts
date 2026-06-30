@@ -18,6 +18,7 @@ export const ApiQueryKeys = {
     AI_BOTS_ENABLE: 'ai-bots-enable',
     AI_BOTS_DISABLE: 'ai-bots-disable',
     AI_BOTS_DELETE: 'ai-bots-delete',
+    AI_BOTS_UPDATE: 'ai-bots-update',
 
     MARKET_DATA: 'market-data'
 } as const

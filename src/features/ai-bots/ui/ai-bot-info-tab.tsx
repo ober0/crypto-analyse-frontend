@@ -1,6 +1,7 @@
 'use client'
 
 import { AiBotDetail } from '@/entities/ai-processing/model/ai-bot'
+import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
 import { DATE_TIME_DEFAULT_FORMAT } from '@/shared/config'
 import { cn } from '@/shared/utils'
 import dayjs from 'dayjs'
@@ -11,12 +12,14 @@ import {
     STATUS_LABELS,
     STATUS_TONES
 } from '../lib/labels'
+import { EditAiBotDialog } from './edit-ai-bot-dialog'
 
 interface AiBotInfoTabProps {
     bot: AiBotDetail
 }
 
 export const AiBotInfoTab = ({ bot }: AiBotInfoTabProps) => {
+    const { isAuth } = useIsAuth()
     const closedPnls = bot.trades
         .map((trade) => toNumber(trade.pnl))
         .filter((value): value is number => value != null)
@@ -43,6 +46,7 @@ export const AiBotInfoTab = ({ bot }: AiBotInfoTabProps) => {
                 <span className="text-muted-foreground text-xs">
                     {bot.ticker.name} · {formatBotModel(bot.model)}
                 </span>
+                {isAuth && <EditAiBotDialog bot={bot} />}
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
