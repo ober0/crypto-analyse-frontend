@@ -2,16 +2,10 @@
 
 import { PageHeader, PageSection } from '@/components/page-layout'
 import SplitText from '@/components/SplitText'
-import { Loader } from '@/components/loader'
-import { useRequireAuth } from '@/entities/auth/hooks/use-require-auth'
 import { AvailableTickers } from '@/features/tickers'
 import { ResultsTickersList } from '@/features/result-tickers'
 
 export default function Home() {
-    const { canRender } = useRequireAuth()
-
-    if (!canRender) return <Loader />
-
     return (
         <div className="flex w-full flex-col gap-6 sm:gap-8">
             <div className="flex flex-col gap-4">

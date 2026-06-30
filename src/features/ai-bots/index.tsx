@@ -6,6 +6,7 @@ import { GlassPanel } from '@/components/page-layout'
 import { Pagination } from '@/components/pagination'
 import { useSearchAiBots } from '@/entities/ai-processing/api/use-ai-bots'
 import { ProcessingInterval, ProcessingStatus } from '@/entities/ai-processing/model/ai-bot'
+import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
 import { useAvailableTickers } from '@/entities/ticker-results/api/use-get-tickers'
 import { TickerModels } from '@/entities/ticker-results/model/ticker'
 import { PLACEHOLDER_QUERY, SortOptions } from '@/shared/types'
@@ -15,6 +16,7 @@ import { AiBotsFilters } from './ui/ai-bots-filters'
 import { CreateAiBotDialog } from './ui/create-ai-bot-dialog'
 
 export const AiBotsModule = () => {
+    const { isAuth } = useIsAuth()
     const [page, setPage] = useState(1)
     const [count, setCount] = useState(10)
 
@@ -61,7 +63,7 @@ export const AiBotsModule = () => {
                 <p className="text-muted-foreground text-sm">
                     Всего ботов: <span className="text-foreground font-medium">{total}</span>
                 </p>
-                <CreateAiBotDialog />
+                {isAuth && <CreateAiBotDialog />}
             </div>
 
             <AiBotsFilters
@@ -84,7 +86,7 @@ export const AiBotsModule = () => {
             {items.length === 0 ? (
                 <GlassPanel className="flex flex-col items-center justify-center gap-3 p-10 text-center">
                     <p className="text-muted-foreground">Торговые боты не найдены</p>
-                    <CreateAiBotDialog />
+                    {isAuth && <CreateAiBotDialog />}
                 </GlassPanel>
             ) : (
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

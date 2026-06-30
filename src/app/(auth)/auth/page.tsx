@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLogin } from '@/entities/auth/api/use-login'
+import { ROUTES } from '@/shared/router'
 import { cn } from '@/shared/utils'
 import { LockKeyhole, Sparkles, UserRound } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useState } from 'react'
 
 export default function AuthPage() {
@@ -101,6 +103,14 @@ export default function AuthPage() {
                             disabled={!form.login.trim() || !form.password.trim()}
                         >
                             Войти
+                        </Button>
+
+                        <Button
+                            asChild
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-foreground h-11 text-sm font-normal"
+                        >
+                            <Link href={ROUTES.HOME_PAGE}>Продолжить без входа</Link>
                         </Button>
                     </div>
                 </div>

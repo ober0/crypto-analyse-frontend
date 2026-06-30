@@ -13,5 +13,6 @@ const self = async (): AxiosPromise<User> => {
 export const useSelf = () =>
     useQuery({
         queryKey: [ApiQueryKeys.USER],
-        queryFn: self
+        queryFn: self,
+        retry: false
     })

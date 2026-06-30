@@ -3,7 +3,7 @@ import { ApiQueryKeys } from '@/shared/config'
 import { ROUTES } from '@/shared/router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
 const logout = async () => {
@@ -13,7 +13,8 @@ const logout = async () => {
 }
 
 export const useLogout = () => {
-    const { push } = useRouter()
+    const { push, refresh } = useRouter()
+    const pathname = usePathname()
     const queryClient = useQueryClient()
 
     return useMutation({
@@ -22,7 +23,12 @@ export const useLogout = () => {
         onSuccess: () => {
             queryClient.clear()
             toast.success('Вы вышли из аккаунта')
-            push(ROUTES.AUTH_PAGE)
+
+            if (pathname === ROUTES.USAGE_PAGE) {
+                push(ROUTES.HOME_PAGE)
+            } else {
+                refresh()
+            }
         },
         onError: (error: AxiosError<{ message?: string }>) => {
             const errorMessage = error.response?.data?.message || error.message || 'Неизвестная ошибка!'

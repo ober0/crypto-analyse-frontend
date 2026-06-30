@@ -9,6 +9,7 @@ import {
     useEnableAiBot
 } from '@/entities/ai-processing/api/use-ai-bots'
 import { AiBotListItem } from '@/entities/ai-processing/model/ai-bot'
+import { useIsAuth } from '@/entities/auth/hooks/use-is-auth'
 import { DATE_TIME_DEFAULT_FORMAT } from '@/shared/config'
 import { getAxiosErrorMessage } from '@/shared/lib/get-axios-error-message'
 import { cn } from '@/shared/utils'
@@ -32,6 +33,7 @@ interface AiBotCardProps {
 }
 
 export const AiBotCard = ({ bot }: AiBotCardProps) => {
+    const { isAuth } = useIsAuth()
     const { mutate: enable, isPending: enabling } = useEnableAiBot()
     const { mutate: disable, isPending: disabling } = useDisableAiBot()
     const { mutate: remove, isPending: deleting } = useDeleteAiBot()
@@ -129,38 +131,40 @@ export const AiBotCard = ({ bot }: AiBotCardProps) => {
                 {bot.nextCheckAt && <span>След. проверка: {dayjs(bot.nextCheckAt).format(DATE_TIME_DEFAULT_FORMAT)}</span>}
             </div>
 
-            <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
-                {canEnable(bot.status) && (
-                    <Button size="sm" className="gap-1.5" onClick={handleEnable} loading={enabling}>
-                        <Play className="size-3.5" />
-                        Запустить
-                    </Button>
-                )}
-                {canDisable(bot.status) && (
-                    <Button
-                        size="sm"
-                        variant="secondary"
-                        className="gap-1.5"
-                        onClick={handleDisable}
-                        loading={disabling}
-                    >
-                        <Pause className="size-3.5" />
-                        Остановить
-                    </Button>
-                )}
-                {canDelete(bot.status) && (
-                    <Button
-                        size="sm"
-                        variant="destructive"
-                        className="gap-1.5"
-                        onClick={handleDelete}
-                        loading={deleting}
-                    >
-                        <Trash2 className="size-3.5" />
-                        Удалить
-                    </Button>
-                )}
-            </div>
+            {isAuth && (
+                <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
+                    {canEnable(bot.status) && (
+                        <Button size="sm" className="gap-1.5" onClick={handleEnable} loading={enabling}>
+                            <Play className="size-3.5" />
+                            Запустить
+                        </Button>
+                    )}
+                    {canDisable(bot.status) && (
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-1.5"
+                            onClick={handleDisable}
+                            loading={disabling}
+                        >
+                            <Pause className="size-3.5" />
+                            Остановить
+                        </Button>
+                    )}
+                    {canDelete(bot.status) && (
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            className="gap-1.5"
+                            onClick={handleDelete}
+                            loading={deleting}
+                        >
+                            <Trash2 className="size-3.5" />
+                            Удалить
+                        </Button>
+                    )}
+                </div>
+            )}
         </GlassPanel>
     )
 }
